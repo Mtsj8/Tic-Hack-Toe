@@ -97,6 +97,7 @@ listToBoard [a,b,c,d,e,f,g,h,i] = Board [a,b,c] [d,e,f] [g,h,i]
 findAndReplace :: Board -> Piece -> Piece -> Board
 findAndReplace board p1 p2 = listToBoard [if x==p1 then p2 else x | x <- bl]
     where bl = boardToList board
+        
 
 seed::Int
 seed = 42
@@ -114,3 +115,4 @@ makeOMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
 	| otherwise 					= if length (possibleMoves board) > 0
 		then findAndReplace board (getRandomElement (possibleMoves board)) (Right O)
 		else board --This should not happen
+
