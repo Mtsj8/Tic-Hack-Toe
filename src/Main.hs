@@ -10,9 +10,7 @@ main = do
 
 	--start recursion
 	playerMove emptyBoard
-
-	putStrLn "Thanks for playing!"
-
+	
 -- |Helper function to ensure prompt is made before user is expected to input something
 promptLine :: String -> IO String
 promptLine text = do
@@ -24,7 +22,10 @@ promptLine text = do
 endRecursion :: Board -> IO ()
 endRecursion b = do
 	putStrLn (show b)
-	putStrLn (winner b) -- end recursion
+	putStrLn (winner b)
+	restart
+-- end recursion
+
 
 -- |Grab the user's move, and feed that to tic-tac-toe. Recurse as needed.
 playerMove :: Board -> IO ()
@@ -32,11 +33,18 @@ playerMove board = do
 	putStrLn (show board)
 	loc <- promptLine "Where do you want to place your X? "
 	putStrLn ""
-	let moveLoc = Left (read loc)
+	let moveLoc = Left (read loc) 
 	let newBoard = findAndReplace board moveLoc (Right X)
 	if won newBoard || draw newBoard
 		then endRecursion newBoard
-		else compMove newBoard			-- continue recursion
+		else if elem moveLoc (possibleMoves board) 
+			then compMove newBoard			-- continue recursion
+			else do
+				putStrLn "Invalid Move! Please Try again! "
+				putStrLn ""
+				playerMove newBoard
+
+				
 
 -- |Make a decision based on the board on where to move. Recurse as needed.
 compMove :: Board -> IO ()
@@ -45,3 +53,16 @@ compMove board = do
 	if won newBoard || draw newBoard
 		then endRecursion newBoard 	-- end recursion
 		else playerMove newBoard 	-- continue recursion
+
+restart :: IO()
+restart = do
+  putStrLn "Would you like to play again? (y/n)"
+  playAgain <- getLine
+  if playAgain == "y" then do
+    putStrLn "Welcome to tic tac toe."
+    playerMove emptyBoard
+  else if playAgain == "n" then
+	putStrLn "Thanks for playing!"
+  else do
+    putStrLn "Hmm i dont undestand. Please enter 'y' or 'n'"
+    restart
