@@ -11,8 +11,6 @@ main = do
 	--start recursion
 	playerMove emptyBoard
 	
-	putStrLn "Thanks for playing!"
-
 -- |Helper function to ensure prompt is made before user is expected to input something
 promptLine :: String -> IO String
 promptLine text = do
@@ -28,20 +26,25 @@ endRecursion b = do
 	restart
 -- end recursion
 
+
 -- |Grab the user's move, and feed that to tic-tac-toe. Recurse as needed.
 playerMove :: Board -> IO ()
 playerMove board = do
 	putStrLn (show board)
 	loc <- promptLine "Where do you want to place your X? "
 	putStrLn ""
-	let moveLoc = Left (read loc)
+	let moveLoc = Left (read loc) 
 	let newBoard = findAndReplace board moveLoc (Right X)
 	if won newBoard || draw newBoard
 		then endRecursion newBoard
-		else if loc `elem` ["1","2","3","4","5","6","7","8","9"]
+		else if elem moveLoc (possibleMoves board) 
 			then compMove newBoard			-- continue recursion
-			else 
-				putStrLn "Invalid Move"
+			else do
+				putStrLn "Invalid Move! Please Try again! "
+				putStrLn ""
+				playerMove newBoard
+
+				
 
 -- |Make a decision based on the board on where to move. Recurse as needed.
 compMove :: Board -> IO ()
