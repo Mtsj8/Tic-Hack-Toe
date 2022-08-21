@@ -7,9 +7,15 @@ import System.IO
 main :: IO ()
 main = do
 	putStrLn "Welcome to tic tac toe."
+	putStrLn ""
 	typeGame <- promptLine "Do you want play with 1 or 2 players?"
-		--start recursion
-	player1Move emptyBoard typeGame
+	if typeGame `elem` ["1","2"]
+		then player1Move emptyBoard typeGame --start recursion
+		else do 
+			putStrLn "Hmm i dont undestand. Please enter 1 or 2"
+			putStrLn ""
+			main
+
 
 	
 -- |Helper function to ensure prompt is made before user is expected to input something
@@ -24,7 +30,7 @@ endRecursion :: Board -> String -> IO ()
 endRecursion b typeGame = do
 	putStrLn (show b)
 	putStrLn (winner b)
-	restart typeGame
+	restartGame typeGame
 -- end recursion
 
 
@@ -73,16 +79,16 @@ compMove board typeGame = do
 	let newBoard = makeOMove board
 	if won newBoard || draw newBoard
 		then endRecursion newBoard typeGame	-- end recursion
-		else player2Move newBoard typeGame	-- continue recursion
+		else player1Move newBoard typeGame	-- continue recursion
 
-restart :: String -> IO()
-restart typeGame = do
+restartGame :: String -> IO()
+restartGame typeGame = do
   putStrLn "Would you like to play again? (y/n)"
-  playAgain <- getLine
-  if playAgain == "y" 
+  newGame <- getLine
+  if newGame == "y" 
 	then do main
-  	else if playAgain == "n" then
+  	else if newGame == "n" then
 		putStrLn "Thanks for playing!"
   	else do
     	putStrLn "Hmm i dont undestand. Please enter 'y' or 'n'"
-    	restart typeGame
+    	restartGame typeGame
