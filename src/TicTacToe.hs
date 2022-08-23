@@ -111,8 +111,16 @@ getRandomElement pieces = pieces !! rand where
 -- |Decision tree for AI that will go down the list to make its move
 makeOMove :: Board -> Board
 makeOMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
-	| elem e (possibleMoves board)	= findAndReplace board e (Right O)
-	| otherwise 					= if length (possibleMoves board) > 0
-		then findAndReplace board (getRandomElement (possibleMoves board)) (Right O)
-		else board --This should not happen
+    | elem e (possibleMoves board) = findAndReplace board e (Right O)
+    | otherwise                     = if length (possibleMoves board) > 0
+        then findAndReplace board (getRandomElement (possibleMoves board)) (Right O)
+        else board --This should not happen
+
+-- |Decision tree for AI that will go down the list to make its move
+makeXMove :: Board -> Board
+makeXMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
+    | elem e (possibleMoves board) = findAndReplace board e (Right X)
+    | otherwise                     = if length (possibleMoves board) > 0
+        then findAndReplace board (getRandomElement (possibleMoves board)) (Right X)
+        else board --This should not happen
 
