@@ -3,12 +3,11 @@ module Main where
 import TicTacToe
 import System.IO
 
--- |Greet user, start recursion, and say farewell to user when game ends
 main :: IO ()
 main = do
-    putStrLn "Welcome to tic tac toe."
+    putStrLn "Bem Vindo ao Jogo da Velha em Haskell"
     putStrLn ""
-    typeGame <- promptLine "Do you want play with 1 or 2 players?"
+    typeGame <- promptLine "Você gostaria de jogar com 1 ou 2 jogadores? (Digite 1 ou 2) "
     if typeGame `elem` ["1","2"]
         then 
             if typeGame == "1"
@@ -20,45 +19,41 @@ main = do
 						then playerXMove emptyBoard typeGame
 					else playerOMove emptyBoard typeGame
             else
-                playerXMove emptyBoard typeGame --start recursion
+                playerXMove emptyBoard typeGame 
         else do 
-            putStrLn "Hmm i dont undestand. Please enter 1 or 2"
+            putStrLn "Hmm, desculpe não entendi. Escolha a opção 1 ou 2."
             putStrLn ""
             main
 
 
 getSymbol :: IO String
 getSymbol = do
-    symbol <- promptLine "Choose your symbol (X or O) "
+    symbol <- promptLine "Escolha o simbolo que gostaria de jogar (Digite X ou O) "
     if symbol `elem` ["X","O"]
         then
             return $ symbol
     else do
-        putStrLn "Hmm i dont undestand."
+        putStrLn "Hmm, desculpe não entendi. Escolha a opção X ou O"
         putStrLn ""
         getSymbol
     
--- |Helper function to ensure prompt is made before user is expected to input something
 promptLine :: String -> IO String
 promptLine text = do
     putStr text
     hFlush stdout
     getLine
 
--- |Code common to both player and computer at the end of the game
 endRecursion :: Board -> String -> IO ()
 endRecursion b typeGame = do
     putStrLn (show b)
     putStrLn (winner b)
     restartGame typeGame
--- end recursion
 
 
--- |Grab the user's move, and feed that to tic-tac-toe. Recurse as needed.
 playerXMove :: Board -> String -> IO ()
 playerXMove board typeGame = do
     putStrLn (show board)
-    loc <- promptLine "Where do you want to place your X? "
+    loc <- promptLine "Aonde você gostaria de colocar o X? "
     putStrLn ""
     let moveLoc = Left (read loc) 
     let newBoard = findAndReplace board moveLoc (Right X)
@@ -67,11 +62,11 @@ playerXMove board typeGame = do
         else if elem moveLoc (possibleMoves board)
 			then do
 				if typeGame == "1" then do
-					compOMove newBoard typeGame        -- continue recursion
+					compOMove newBoard typeGame    
 				else 
 					playerOMove newBoard typeGame
 		else do
-			putStrLn "Invalid Move! Please Try again! "
+			putStrLn "Movimento Inválido, tente de novo!"
 			putStrLn ""
 			playerXMove newBoard typeGame
 
@@ -79,7 +74,7 @@ playerXMove board typeGame = do
 playerOMove :: Board -> String -> IO ()
 playerOMove board typeGame = do
     putStrLn (show board)
-    loc <- promptLine "Where do you want to place your O? "
+    loc <- promptLine "Aonde você gostaria de colocar o O? "
     putStrLn ""
     let moveLoc = Left (read loc) 
     let newBoard = findAndReplace board moveLoc (Right O)
@@ -88,39 +83,37 @@ playerOMove board typeGame = do
         else if elem moveLoc (possibleMoves board)
 			then do
 				if typeGame == "1" then do
-					compXMove newBoard typeGame        -- continue recursion
+					compXMove newBoard typeGame     
 				else do
 					playerXMove newBoard typeGame
 		else do
-			putStrLn "Invalid Move! Please Try again! "
+			putStrLn "Movimento Inválido, tente de novo!"
 			putStrLn ""
 			playerOMove newBoard typeGame
 
                 
--- |Make a decision based on the board on where to move. Recurse as needed.
 compXMove :: Board -> String -> IO ()
 compXMove board typeGame = do
     let newBoard = makeXMove board
     if won newBoard || draw newBoard
-        then endRecursion newBoard typeGame    -- end recursion
-        else playerOMove newBoard typeGame    -- continue recursion
+        then endRecursion newBoard typeGame    
+        else playerOMove newBoard typeGame   
 
--- |Make a decision based on the board on where to move. Recurse as needed.
 compOMove :: Board -> String -> IO ()
 compOMove board typeGame = do
     let newBoard = makeOMove board
     if won newBoard || draw newBoard
-        then endRecursion newBoard typeGame    -- end recursion
-        else playerXMove newBoard typeGame    -- continue recursion
+        then endRecursion newBoard typeGame    
+        else playerXMove newBoard typeGame    
 
 restartGame :: String -> IO()
 restartGame typeGame = do
-  putStrLn "Would you like to play again? (y/n)"
+  putStrLn "Você gostaria de jogas mais uma vez? (S ou N)"
   newGame <- getLine
-  if newGame == "y" 
+  if newGame == "S" 
     then do main
-      else if newGame == "n" then
-        putStrLn "Thanks for playing!"
+      else if newGame == "N" then
+        putStrLn "Obrigada por jogar!"
       else do
-        putStrLn "Hmm i dont undestand. Please enter 'y' or 'n'"
+        putStrLn "Hmm, desculpe não entendi. Escolha a opção S ou N"
         restartGame typeGame
