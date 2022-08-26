@@ -29,7 +29,7 @@ main = do
 
 getSymbol :: IO String
 getSymbol = do
-    symbol <- promptLine "Choose your symbol (X or O)"
+    symbol <- promptLine "Choose your symbol (X or O) "
     if symbol `elem` ["X","O"]
         then
             return $ symbol
