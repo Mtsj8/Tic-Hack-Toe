@@ -9,32 +9,24 @@ import Safe
 import Data.Maybe
 import Data.List
 
--- |Slots in the board can either be filled with Naughts or Crosses
 data Symbol = X | O
     deriving (Show, Eq)
 
--- |Empty slots are referred to by their location on the board
 type Piece = Either Int Symbol
 
--- |A set of three pieces is used to represent rows, columns, and diagonals
-type Three = [Piece] -- how do I constrain this to a length of three?
+type Three = [Piece]
 
--- |The game board is made up of three rows of three pieces each.
 data Board = Board Three Three Three
     deriving (Eq)
 
---Thank you to http://projects.haskell.org/operational/examples/TicTacToe.hs.html for the show function
 instance Show Board where
     show board =
-        unlines . surround "---+----+---"
-        . map (concat . surround "|". map showSquare)
-        $ (rows board)
+        unlines . arround "+----++---++----+" . map (concat . arround "||". map element) $ (rows board)
         where
-            surround x xs = concat [[x], intersperse x xs , [x]]
-            showSquare = either (\n -> " " ++ show n ++ " ") (\n -> color n)
+            arround x xs = concat [[x], intersperse x xs , [x]]
+            element = either (\n -> " " ++ show n ++ " ") (\n -> color n)
 
 
--- | Black=30, Red=31, Green=32, Yellow=33, Blue=34, Magenta=35, Cyan=36, White=37
 color :: Symbol -> String 
 color s
         | s == X     = concat [esc 35," ", show s," ", esc 0]
@@ -42,57 +34,47 @@ color s
     where 
         esc i = concat ["\ESC[", show i, "m"]
 
--- |Convenience function for constructing an empty board
 emptyBoard :: Board
 emptyBoard = Board [Left 1, Left 2, Left 3] [Left 4, Left 5, Left 6] [Left 7, Left 8, Left 9]
 
--- |Given either a row, column, or diagonal, it checks whether it is entirely filled with naughts or crosses
-full :: Three -> Bool
-full ts@[a,b,c] = noLefts && allEqual
-    where
-        noLefts = foldl (\acc curr -> acc && (isRight curr)) True ts
-        allEqual = a == b && b == c
-
--- |Given a game board, check whether the game is over because someone won
-won :: Board -> Bool
-won b = foldl (\acc curr -> acc || (full curr)) False ((rows b) ++ (cols b) ++ (diags b))
-
--- |Given a game board, check whether the game is over due to a draw
-draw :: Board -> Bool
-draw b = length (possibleMoves b) == 0
-
--- |Message to display to the user about the results of the game
-winner :: Board -> String 
-winner b = if length winnerType > 0 then head winnerType else "It was a draw!"
-    where
-        allConfigs = ((rows b) ++ (cols b) ++ (diags b))
-        winnerType = [if a == (Right O) then "Player 'O' win!" else "Player 'X' win!" | curr@[a,b,c] <- allConfigs, full curr]
-
--- |Extract rows from game board
 rows :: Board -> [Three]
-rows (Board x y z) = [x, y, z]
+rows (Board x@[a, b, c] y@[d, e, f] z@[g, h, i]) = [x, y, z]
 
--- |Extract columns from game board
 cols :: Board -> [Three]
 cols (Board [a, b, c] [d, e, f] [g, h, i]) = [[a, d, g], [b, e, h], [c, f, i]]
 
--- |Extract diagonals from game board
-diags :: Board -> [Three]
-diags (Board [a, _, c] [_, e, _] [g, _, i]) = [[a, e, i], [c, e, g]]
+diagons :: Board -> [Three]
+diagons (Board x@[a, b, c] y@[d, e, f] z@[g, h, i]) = [[a, e, i], [c, e, g]]
 
--- |List of places where a piece can be placed
+
+full :: Three -> Bool
+full ts@[a,b,c] = withoutLeft && equals
+    where
+        withoutLeft = foldl (\acc curr -> acc && (isRight curr)) True ts
+        equals = a == b && b == c
+
+haveWon :: Board -> Bool
+haveWon b = foldl (\acc curr -> acc || (full curr)) False ((rows b) ++ (cols b) ++ (diagons b))
+
+draw :: Board -> Bool
+draw b = length (possibleMoves b) == 0
+
+winner :: Board -> String 
+winner b = if length winnerType > 0 then head winnerType else "É um empate!!"
+    where
+        allConfigs = ((rows b) ++ (cols b) ++ (diagons b))
+        winnerType = [if a == (Right O) then "Jogador"++ color O ++ "venceu!" else "Jogador"++ color X ++ "venceu!" | curr@[a,b,c] <- allConfigs, full curr]
+
+
 possibleMoves :: Board -> [Piece]
 possibleMoves board = filter isLeft (boardToList board)
 
--- |Helper function to convert a board into a list of values
 boardToList :: Board -> [Piece]
 boardToList (Board x y z) = x ++ y ++ z
 
--- |Helper function to convert a list of values into a board
 listToBoard :: [Piece] -> Board
 listToBoard [a,b,c,d,e,f,g,h,i] = Board [a,b,c] [d,e,f] [g,h,i]
 
--- |Function to update the game board with a new value at a specified point
 findAndReplace :: Board -> Piece -> Piece -> Board
 findAndReplace board p1 p2 = listToBoard [if x==p1 then p2 else x | x <- bl]
     where bl = boardToList board
@@ -107,19 +89,17 @@ getRandomElement pieces = pieces !! rand where
     n = length pieces
     (rand, _) = randomR (0,(n-1)) generator
 
--- |Decision tree for AI that will go down the list to make its move
 makeOMove :: Board -> Board
 makeOMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
     | elem e (possibleMoves board) = findAndReplace board e (Right O)
     | otherwise                     = if length (possibleMoves board) > 0
         then findAndReplace board (getRandomElement (possibleMoves board)) (Right O)
-        else board --This should not happen
+        else board 
 
--- |Decision tree for AI that will go down the list to make its move
 makeXMove :: Board -> Board
 makeXMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
     | elem e (possibleMoves board) = findAndReplace board e (Right X)
     | otherwise                     = if length (possibleMoves board) > 0
         then findAndReplace board (getRandomElement (possibleMoves board)) (Right X)
-        else board --This should not happen
+        else board 
 

@@ -57,7 +57,7 @@ playerXMove board typeGame = do
     putStrLn ""
     let moveLoc = Left (read loc) 
     let newBoard = findAndReplace board moveLoc (Right X)
-    if won newBoard || draw newBoard
+    if haveWon newBoard || draw newBoard
         then endRecursion newBoard typeGame
         else if elem moveLoc (possibleMoves board)
 			then do
@@ -78,7 +78,7 @@ playerOMove board typeGame = do
     putStrLn ""
     let moveLoc = Left (read loc) 
     let newBoard = findAndReplace board moveLoc (Right O)
-    if won newBoard || draw newBoard
+    if haveWon newBoard || draw newBoard
         then endRecursion newBoard typeGame
         else if elem moveLoc (possibleMoves board)
 			then do
@@ -95,14 +95,14 @@ playerOMove board typeGame = do
 compXMove :: Board -> String -> IO ()
 compXMove board typeGame = do
     let newBoard = makeXMove board
-    if won newBoard || draw newBoard
+    if haveWon newBoard || draw newBoard
         then endRecursion newBoard typeGame    
         else playerOMove newBoard typeGame   
 
 compOMove :: Board -> String -> IO ()
 compOMove board typeGame = do
     let newBoard = makeOMove board
-    if won newBoard || draw newBoard
+    if haveWon newBoard || draw newBoard
         then endRecursion newBoard typeGame    
         else playerXMove newBoard typeGame    
 
