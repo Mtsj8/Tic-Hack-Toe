@@ -3,6 +3,7 @@ module Main where
 import TicTacToe
 import System.IO
 
+-- Inicio do jogo com escolha de multiplayer ou IA
 main :: IO ()
 main = do
     putStrLn "Bem Vindo ao Jogo da Velha em Haskell"
@@ -25,7 +26,7 @@ main = do
             putStrLn ""
             main
 
-
+--Escolha de simbolo "X" ou "O" pelo jogador 
 getSymbol :: IO String
 getSymbol = do
     symbol <- promptLine "Escolha o simbolo que gostaria de jogar (Digite X ou O) "
@@ -36,20 +37,22 @@ getSymbol = do
         putStrLn "Hmm, desculpe não entendi. Escolha a opção X ou O"
         putStrLn ""
         getSymbol
-    
+
+-- Prompt para o usuário inserir escolha   
 promptLine :: String -> IO String
 promptLine text = do
     putStr text
     hFlush stdout
     getLine
 
+-- Finalização do jogo
 endRecursion :: Board -> String -> IO ()
 endRecursion b typeGame = do
     putStrLn (show b)
     putStrLn (winner b)
     restartGame typeGame
 
-
+-- Movimentos do jogador com simbolo "X"
 playerXMove :: Board -> String -> IO ()
 playerXMove board typeGame = do
     putStrLn (show board)
@@ -70,7 +73,7 @@ playerXMove board typeGame = do
 			putStrLn ""
 			playerXMove newBoard typeGame
 
-
+-- Movimentos do jogador com simbolo "O"
 playerOMove :: Board -> String -> IO ()
 playerOMove board typeGame = do
     putStrLn (show board)
@@ -91,7 +94,8 @@ playerOMove board typeGame = do
 			putStrLn ""
 			playerOMove newBoard typeGame
 
-                
+
+-- Movimentos da IA com simbolo "X"               
 compXMove :: Board -> String -> IO ()
 compXMove board typeGame = do
     let newBoard = makeXMove board
@@ -99,6 +103,8 @@ compXMove board typeGame = do
         then endRecursion newBoard typeGame    
         else playerOMove newBoard typeGame   
 
+
+-- Movimentos da IA com simbolo "O"               
 compOMove :: Board -> String -> IO ()
 compOMove board typeGame = do
     let newBoard = makeOMove board
@@ -106,6 +112,7 @@ compOMove board typeGame = do
         then endRecursion newBoard typeGame    
         else playerXMove newBoard typeGame    
 
+-- Restart do jogo com escolha do jogador
 restartGame :: String -> IO()
 restartGame typeGame = do
   putStrLn "Você gostaria de jogas mais uma vez? (S ou N)"
