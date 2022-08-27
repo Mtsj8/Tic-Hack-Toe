@@ -56,10 +56,10 @@ playerXMove board typeGame = do
     loc <- promptLine "Aonde você gostaria de colocar o X? "
     putStrLn ""
     let moveLoc = Left (read loc) 
-    let newBoard = findAndReplace board moveLoc (Right X)
+    let newBoard = replacePiece board moveLoc (Right X)
     if haveWon newBoard || draw newBoard
         then endRecursion newBoard typeGame
-        else if elem moveLoc (possibleMoves board)
+        else if elem moveLoc (viableMoves board)
 			then do
 				if typeGame == "1" then do
 					compOMove newBoard typeGame    
@@ -77,10 +77,10 @@ playerOMove board typeGame = do
     loc <- promptLine "Aonde você gostaria de colocar o O? "
     putStrLn ""
     let moveLoc = Left (read loc) 
-    let newBoard = findAndReplace board moveLoc (Right O)
+    let newBoard = replacePiece board moveLoc (Right O)
     if haveWon newBoard || draw newBoard
         then endRecursion newBoard typeGame
-        else if elem moveLoc (possibleMoves board)
+        else if elem moveLoc (viableMoves board)
 			then do
 				if typeGame == "1" then do
 					compXMove newBoard typeGame     

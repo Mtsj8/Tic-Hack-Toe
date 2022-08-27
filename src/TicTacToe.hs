@@ -47,15 +47,15 @@ diagons :: Board -> [Three]
 diagons (Board x@[a, b, c] y@[d, e, f] z@[g, h, i]) = [[a, e, i], [c, e, g]]
 
 
-possibleMoves :: Board -> [Piece]
-possibleMoves board = filter isLeft (boardList board)
+viableMoves :: Board -> [Piece]
+viableMoves board = filter isLeft (boardList board)
 
 haveWon :: Board -> Bool
 haveWon b = foldl (\acc curr -> acc || (fullBoard curr)) False ((rows b) ++ (cols b) ++ (diagons b))
     where fullBoard ts@[a,b,c] = foldl (\acc curr -> acc && (isRight curr)) True ts && a == b && b == c
 
 draw :: Board -> Bool
-draw b = length (possibleMoves b) == 0
+draw b = length (viableMoves b) == 0
 
 winner :: Board -> String 
 winner b = if length winnerType > 0 then head winnerType else "É um empate!!"
@@ -71,13 +71,12 @@ boardList (Board x y z) = concat [x, y, z]
 listBoard :: [Piece] -> Board
 listBoard [a,b,c,d,e,f,g,h,i] = Board [a,b,c] [d,e,f] [g,h,i]
 
-findAndReplace :: Board -> Piece -> Piece -> Board
-findAndReplace board p1 p2 = listBoard [place x | x <- bl]
+replacePiece :: Board -> Piece -> Piece -> Board
+replacePiece board p1 p2 = listBoard [place x | x <- bl]
     where
         place x =  if x==p1 then p2 else x
         bl = boardList board
         
-
 seed::Int
 seed = 42
 generator = mkStdGen seed
@@ -89,15 +88,15 @@ getRandomElement pieces = pieces !! rand where
 
 makeOMove :: Board -> Board
 makeOMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
-    | elem e (possibleMoves board) = findAndReplace board e (Right O)
-    | otherwise                     = if length (possibleMoves board) > 0
-        then findAndReplace board (getRandomElement (possibleMoves board)) (Right O)
+    | elem e (viableMoves board) = replacePiece board e (Right O)
+    | otherwise                     = if length (viableMoves board) > 0
+        then replacePiece board (getRandomElement (viableMoves board)) (Right O)
         else board 
 
 makeXMove :: Board -> Board
 makeXMove board@(Board x@[a, b, c] y@[d, e, f] z@[g, h, i])
-    | elem e (possibleMoves board) = findAndReplace board e (Right X)
-    | otherwise                     = if length (possibleMoves board) > 0
-        then findAndReplace board (getRandomElement (possibleMoves board)) (Right X)
+    | elem e (viableMoves board) = replacePiece board e (Right X)
+    | otherwise                     = if length (viableMoves board) > 0
+        then replacePiece board (getRandomElement (viableMoves board)) (Right X)
         else board 
 
