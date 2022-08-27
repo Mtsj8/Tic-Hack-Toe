@@ -24,11 +24,11 @@ instance Show Board where
         unlines . arround "+----++---++----+" . map (concat . arround "||". map element) $ (rows board)
         where
             arround x xs = concat [[x], intersperse x xs , [x]]
-            element = either (\n -> " " ++ show n ++ " ") (\n -> color n)
+            element = either (\n -> " " ++ show n ++ " ") (\n -> pieceColor n)
 
 
-color :: Symbol -> String 
-color s
+pieceColor :: Symbol -> String 
+pieceColor s
         | s == X     = concat [esc 35," ", show s," ", esc 0]
         | otherwise  = concat [esc 36," ", show s," ", esc 0]
     where 
@@ -47,14 +47,12 @@ diagons :: Board -> [Three]
 diagons (Board x@[a, b, c] y@[d, e, f] z@[g, h, i]) = [[a, e, i], [c, e, g]]
 
 
-full :: Three -> Bool
-full ts@[a,b,c] = withoutLeft && equals
-    where
-        withoutLeft = foldl (\acc curr -> acc && (isRight curr)) True ts
-        equals = a == b && b == c
+possibleMoves :: Board -> [Piece]
+possibleMoves board = filter isLeft (boardList board)
 
 haveWon :: Board -> Bool
-haveWon b = foldl (\acc curr -> acc || (full curr)) False ((rows b) ++ (cols b) ++ (diagons b))
+haveWon b = foldl (\acc curr -> acc || (fullBoard curr)) False ((rows b) ++ (cols b) ++ (diagons b))
+    where fullBoard ts@[a,b,c] = foldl (\acc curr -> acc && (isRight curr)) True ts && a == b && b == c
 
 draw :: Board -> Bool
 draw b = length (possibleMoves b) == 0
@@ -63,21 +61,21 @@ winner :: Board -> String
 winner b = if length winnerType > 0 then head winnerType else "É um empate!!"
     where
         allConfigs = ((rows b) ++ (cols b) ++ (diagons b))
-        winnerType = [if a == (Right O) then "Jogador"++ color O ++ "venceu!" else "Jogador"++ color X ++ "venceu!" | curr@[a,b,c] <- allConfigs, full curr]
+        fullBoard ts@[a,b,c] = foldl (\acc curr -> acc && (isRight curr)) True ts && a == b && b == c
+        winnerType = [if a == (Right O) then "Jogador"++ pieceColor O ++ "venceu!" else "Jogador"++ pieceColor X ++ "venceu!" | curr@[a,b,c] <- allConfigs, fullBoard curr]
 
 
-possibleMoves :: Board -> [Piece]
-possibleMoves board = filter isLeft (boardToList board)
+boardList :: Board -> [Piece]
+boardList (Board x y z) = concat [x, y, z]
 
-boardToList :: Board -> [Piece]
-boardToList (Board x y z) = x ++ y ++ z
-
-listToBoard :: [Piece] -> Board
-listToBoard [a,b,c,d,e,f,g,h,i] = Board [a,b,c] [d,e,f] [g,h,i]
+listBoard :: [Piece] -> Board
+listBoard [a,b,c,d,e,f,g,h,i] = Board [a,b,c] [d,e,f] [g,h,i]
 
 findAndReplace :: Board -> Piece -> Piece -> Board
-findAndReplace board p1 p2 = listToBoard [if x==p1 then p2 else x | x <- bl]
-    where bl = boardToList board
+findAndReplace board p1 p2 = listBoard [place x | x <- bl]
+    where
+        place x =  if x==p1 then p2 else x
+        bl = boardList board
         
 
 seed::Int
